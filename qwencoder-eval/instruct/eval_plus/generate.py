@@ -119,6 +119,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model_type", required=True, type=str, choices=MODEL_MAPPING.keys())
     parser.add_argument("--model_path", type=str, default=None)
+    parser.add_argument("--model_name", type=str, default=None)
     parser.add_argument("--model_size", required=True, type=str)
     parser.add_argument("--bs", default=1, type=int)
     parser.add_argument("--temperature", default=0.0, type=float)
@@ -181,6 +182,7 @@ def main():
         args.model_type
         + f"_{args.model_size}"
         + f"_temp_{args.temperature}"
+        + f"_{args.model_name}"
         + ("" if args.contract_type == "none" else f"-contract-{args.contract_type}"),
     )
     os.makedirs(workdir, exist_ok=True)
