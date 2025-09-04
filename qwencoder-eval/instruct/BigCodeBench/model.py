@@ -137,8 +137,7 @@ class VllmDecoder(DecoderBase):
             "dtype": self.dtype,
             "trust_remote_code": True,
             "enforce_eager": True,
-            "gpu_memory_utilization": 0.95,
-            "worker_use_ray": True
+            "gpu_memory_utilization": 0.95
         }
         if self.tokenizer_name is None:
             self.tokenizer_name = self.name
@@ -146,7 +145,7 @@ class VllmDecoder(DecoderBase):
         self.tokenizer = AutoTokenizer.from_pretrained(self.tokenizer_name, **kwargs, legacy=self.tokenizer_legacy)
         if self.tokenizer.chat_template is None:
             self.eos += extra_eos_for_direct_completion(dataset)
-        self.llm = LLM(model=name, max_model_len=2048, **kwargs)
+        self.llm = LLM(model=name, max_model_len=8192, **kwargs)
         self.llm.set_tokenizer(tokenizer=self.tokenizer)
 
     def is_direct_completion(self) -> bool:
@@ -490,6 +489,7 @@ def make_model(
             trust_remote_code=trust_remote_code,
             tokenizer_name=tokenizer_name,
             tokenizer_legacy=tokenizer_legacy,
+            max_new_tokens=4092
         )
     elif backend == "hf":
         return GenenralHfTorchDecoder(

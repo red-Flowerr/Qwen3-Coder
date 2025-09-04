@@ -163,3 +163,4 @@ cython_debug/
 #.idea/
 
 qwencoder-eval/instruct/eval_plus/results/
+qwencoder-eval/instruct/BigCodeBench/outputs

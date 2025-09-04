@@ -7,6 +7,8 @@ export HF_EVALUATE_OFFLINE=1
 export MODEL_DIR=${1}
 export TP=${2}
 export OUTPUT_DIR=${3}
+export MODEL_NAME=${4}
+export CUDA_VISIBLE_DEVICES=${5}
 mkdir -p ${OUTPUT_DIR}
 
 run_benchmark() {
@@ -18,19 +20,18 @@ run_benchmark() {
     --model ${MODEL_DIR} \
     --split ${SPLIT} \
     --subset ${SUBSET} \
-    --greedy  \
     --bs 1 \
-    --temperature 0 \
+    --temperature 0.6 \
     --n_samples 1 \
     --resume  \
     --backend vllm \
     --tp ${TP} \
-    --save_path ${OUTPUT_DIR}/bigcodebench_${SPLIT}_${SUBSET}/completion.jsonl \
+    --save_path ${OUTPUT_DIR}/bigcodebench_${MODEL_NAME}_${SPLIT}_${SUBSET}/completion.jsonl \
     #--chat_mode
 
   # Sanitize and calibrate the generated samples
   python sanitize.py \
-    --samples ${OUTPUT_DIR}/bigcodebench_${SPLIT}_${SUBSET}/completion.jsonl \
+    --samples ${OUTPUT_DIR}/bigcodebench_${MODEL_NAME}_${SPLIT}_${SUBSET}/completion.jsonl \
     --calibrate
 
   # Evaluate the sanitized and calibrated completions
@@ -38,7 +39,7 @@ run_benchmark() {
     --split ${SPLIT} \
     --subset ${SUBSET} \
     --no-gt \
-    --samples ${OUTPUT_DIR}/bigcodebench_${SPLIT}_${SUBSET}/completion-sanitized-calibrated.jsonl
+    --samples ${OUTPUT_DIR}/bigcodebench_${MODEL_NAME}_${SPLIT}_${SUBSET}/completion-sanitized-calibrated.jsonl
   
   # You are strongly recommended to use the following command to clean up the environment after evaluation:
   pids=$(ps -u $(id -u) -o pid,comm | grep 'bigcodebench' | awk '{print $1}'); if [ -n \"$pids\" ]; then echo $pids | xargs -r kill; fi;
