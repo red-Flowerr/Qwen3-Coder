@@ -5,7 +5,7 @@ export TP=${2}
 export OUTPUT_DIR=${3}
 
 export VLLM_N_GPUS=${TP}
-
+export CUDA_VISIBLE_DEVICES=3
 # define the tasks
 TASKS=("spider-dev-chat-cot" "bird-dev-chat-cot")
 
@@ -29,29 +29,29 @@ for TASK in "${TASKS[@]}"; do
         --model ${MODEL_DIR} \
         --tasks ${TASK} \
         --max_length_input 4096 \
-        --max_new_tokens 1024 \
+        --max_new_tokens 4096 \
         --n_samples 1 \
         --batch_size 1 \
         --generation_only \
         --save_generations \
-        --save_generations_path ${RESULTS_DIR}/generations.json \
+        --save_generations_path ${RESULTS_DIR}/2node_generations.json \
         --chat_mode \
         2>&1 | tee ${RESULTS_DIR}/log.log 2>&1
 
     # convert the generations to sql
     python -u dog_utils.py \
-        --in_f ${RESULTS_DIR}/generations.json \
-        --out_f ${RESULTS_DIR}/generations.sql \
+        --in_f ${RESULTS_DIR}/2node_generations.json \
+        --out_f ${RESULTS_DIR}/2node_generations.sql \
         2>&1 | tee -a ${RESULTS_DIR}/log.log
 
     # run the evaluation
     python -u sql_suites/eval.py \
         --db_root ${DB_ROOT} \
-        --gen_sqls ${RESULTS_DIR}/generations.sql \
+        --gen_sqls ${RESULTS_DIR}/2node_generations.sql \
         --gold_sqls ${GOLD_SQLS} \
         --num_workers 16 \
         --mode ${MODE} \
         --exec_time_out 30 \
-        --save_to ${RESULTS_DIR}/result.json \
+        --save_to ${RESULTS_DIR}/2node_result.json \
         2>&1 | tee -a ${RESULTS_DIR}/log.log
 done
